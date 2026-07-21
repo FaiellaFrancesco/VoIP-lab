@@ -70,7 +70,8 @@ Tutti i telefoni sono forzati sul codec **G.711**, così Wireshark può ricostru
  
 - [x] Infrastruttura Docker (centralino + vittima + attaccante) funzionante
 - [x] Chiamata con audio noto stabile (~60s)
-- [ ] Esecuzione dell'attacco: ARP spoofing + cattura + ricostruzione in Wireshark
+- [x] Esecuzione dell'attacco: ARP spoofing + cattura + ricostruzione in Wireshark
+- [ ] Attacco 2: caller ID spoofing
 - [ ] Contromisure (SRTP, SIP/TLS) e confronto prima/dopo
 ## 7. Nota
  
