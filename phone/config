@@ -1,0 +1,12 @@
+# baresip - telefono-vittima (headless)
+audio_player    aufile,/root/heard.wav
+audio_source    aufile,/root/secret.wav
+audio_alert     aufile,/root/alert.wav
+
+module_path     /usr/lib/baresip/modules
+module          stdio.so
+module          g711.so
+module          ausine.so
+module          aufile.so
+module_tmp      account.so
+module_app      menu.so

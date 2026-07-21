@@ -1,0 +1,42 @@
+services:
+  asterisk:
+    build: ./asterisk
+    container_name: voip-asterisk
+    networks:
+      voip_net:
+        ipv4_address: 172.20.0.10
+
+  phone:
+    build: ./phone
+    container_name: voip-phone
+    depends_on:
+      - asterisk
+    networks:
+      voip_net:
+        ipv4_address: 172.20.0.20
+    stdin_open: true
+    tty: true
+
+  attacker:
+    build: ./attacker
+    container_name: voip-attacker
+    depends_on:
+      - asterisk
+      - phone
+    networks:
+      voip_net:
+        ipv4_address: 172.20.0.66
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    sysctls:
+      - net.ipv4.ip_forward=1
+    volumes:
+      - ./captures:/captures
+
+networks:
+  voip_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
