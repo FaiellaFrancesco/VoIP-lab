@@ -34,6 +34,15 @@ services:
     volumes:
       - ./captures:/captures
 
+  spoofer:
+    build: ./spoofer
+    container_name: voip-spoofer
+    depends_on:
+      - asterisk
+    networks:
+      voip_net:
+        ipv4_address: 172.20.0.99
+
 networks:
   voip_net:
     driver: bridge

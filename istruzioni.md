@@ -26,3 +26,17 @@ ritorno nell altro terminale, premo ctrl c e poi pkill arpspoof e exit
 
 con wireshark captures/voip.pcap 
 ascolto l audio (telephony -> rtp -> rtp streams)
+
+#ATTACCO 2
+
+## 1) Accediamo al logger SIP di Asterisk
+docker exec voip-asterisk asterisk -rx "pjsip set logger on"
+
+## 2) Chiamata falsificata dallo spoofer
+docker exec -it voip-spoofer sipp -sf /root/spoof.xml 172.20.0.10:5060 -m 1 -nostdin
+
+## 3) Mostrare l'attaco
+sia controllando log asterisk, sia utilizzando wireshark.
+
+
+
