@@ -8,5 +8,6 @@ module          stdio.so
 module          g711.so
 module          ausine.so
 module          aufile.so
+module          srtp.so
 module_tmp      account.so
 module_app      menu.so

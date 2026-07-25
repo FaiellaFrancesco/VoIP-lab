@@ -38,6 +38,40 @@ docker exec -it voip-spoofer sipp -sf /root/spoof.xml 172.20.0.10:5060 -m 1 -nos
 ## 3) Mostrare l'attaco
 sia controllando log asterisk, sia utilizzando wireshark.
 
+# DIFESA ATTACCO 1 (intercettazione) — SRTP
+
+## 0) Pulizia + avvio in modalità sicura
+docker compose --profile insecure --profile secure down --remove-orphans
+docker compose --profile secure up --build
+
+## 1) Chiamata legittima (ora cifrata)
+# Deve funzionare come sempre: il telefono 6001 negozia SRTP con Asterisk.
+docker attach voip-phone      # digito 500 + Invio; 'b' per chiudere, Ctrl-P Ctrl-Q per staccarmi
+
+## 2) Rifaccio l'intercettazione (stessa procedura dell'attacco 1)
+docker exec -it voip-attacker bash
+# dentro il container:
+arpspoof -i eth0 -t 172.20.0.20 172.20.0.10 > /dev/null 2>&1 &
+arpspoof -i eth0 -t 172.20.0.10 172.20.0.20 > /dev/null 2>&1 &
+tcpdump -i eth0 -w /captures/voip_srtp.pcap udp
+# (in un altro terminale faccio la chiamata al 500, poi Ctrl-C qui, pkill arpspoof, exit)
+
+## 3) Verifica della cifratura (cattura live sull'interfaccia del bridge)
+# Apro Wireshark direttamente sull'interfaccia br-<id> (Cattura live), filtro: sip
+# Nell'INVITE -> SDP cerco:
+#   m=audio ... RTP/SAVP      -> SRTP attivo (S = Secure)
+#   a=crypto:1 AES_CM_...     -> chiave di cifratura
+
+## 4) Risultato atteso
+# - Telephony -> RTP -> "flussi 0": Wireshark non ricostruisce l'audio.
+#   (Decodifica come RTP -> riproduzione = solo RUMORE, non i toni)
+# - L'audio e' protetto: l'intercettazione FALLISCE nel suo scopo.
+
+## Nota importante (perche' serve anche TLS)
+# La riga a=crypto contiene la CHIAVE SRTP e viaggia nel SIP IN CHIARO:
+# chi legge la segnalazione puo' estrarla. Per questo la difesa si completa
+# solo cifrando anche il SIP con TLS (tappa 2).
+
 
 
 # DIFESA ATTACCO 2 (spoofing) — Autenticazione
