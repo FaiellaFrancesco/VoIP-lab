@@ -2,11 +2,11 @@
 *.log
 *.tmp
 
-# Catture di rete (se usi Wireshark/tcpdump per analizzare il traffico VoIP)
+# Catture di rete 
 *.pcap
 *.pcapng
 
-# File di ambiente (MAI pushare password SIP o credenziali in chiaro)
+# File di ambiente 
 .env
 
 # Roba di sistema di Linux/macOS
