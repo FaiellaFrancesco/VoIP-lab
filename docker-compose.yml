@@ -1,28 +1,45 @@
+
+#   docker compose --profile insecure up --build   -> attacchi FUNZIONANO
+#   docker compose --profile secure   up --build   -> attacchi FALLISCONO
+
+
 services:
-  asterisk:
+  # --- Centralino INSICURO (con endpoint anonimo) ---
+  asterisk-insecure:
     build: ./asterisk
     container_name: voip-asterisk
+    profiles: [insecure]
+    volumes:
+      - ./asterisk/pjsip.insecure.conf:/etc/asterisk/pjsip.conf:ro
     networks:
       voip_net:
         ipv4_address: 172.20.0.10
 
+  # --- Centralino SICURO (autenticazione richiesta) ---
+  asterisk-secure:
+    build: ./asterisk
+    container_name: voip-asterisk
+    profiles: [secure]
+    volumes:
+      - ./asterisk/pjsip.secure.conf:/etc/asterisk/pjsip.conf:ro
+    networks:
+      voip_net:
+        ipv4_address: 172.20.0.10
+
+  # --- Telefono-vittima (sempre attivo) ---
   phone:
     build: ./phone
     container_name: voip-phone
-    depends_on:
-      - asterisk
     networks:
       voip_net:
         ipv4_address: 172.20.0.20
     stdin_open: true
     tty: true
 
+  # --- Attaccante attacco 1 (sempre attivo) ---
   attacker:
     build: ./attacker
     container_name: voip-attacker
-    depends_on:
-      - asterisk
-      - phone
     networks:
       voip_net:
         ipv4_address: 172.20.0.66
@@ -34,11 +51,10 @@ services:
     volumes:
       - ./captures:/captures
 
+  # --- Spoofer attacco 2 (sempre attivo) ---
   spoofer:
     build: ./spoofer
     container_name: voip-spoofer
-    depends_on:
-      - asterisk
     networks:
       voip_net:
         ipv4_address: 172.20.0.99
