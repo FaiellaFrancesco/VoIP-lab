@@ -2,8 +2,6 @@
 
 Un piccolo laboratorio per **rompere** e poi **difendere** le comunicazioni VoIP. In pratica ricostruisco un'intera reticella telefonica dentro Docker — centralino, telefono-vittima e due container "cattivi" — per far vedere dal vivo cosa succede quando SIP e RTP viaggiano senza protezioni.
 
-> Spiegazione dettagliata di ogni pezzo in **[STRUTTURA_LAB.md](STRUTTURA_LAB.md)**.
-
 ## 1. Obiettivo
 
 L'idea di fondo: i protocolli base del VoIP (**SIP** e **RTP**) sono nati per *funzionare*, non per essere *sicuri*. Senza cifratura, chi si trova sulla stessa rete può:
@@ -93,7 +91,7 @@ docker exec -it voip-spoofer sipp -sf /root/spoof.xml 172.20.0.10:5060 -m 1 -nos
 - [x] Chiamata con audio noto stabile (~60s)
 - [x] Attacco 1: ARP spoofing + cattura + ricostruzione audio in Wireshark
 - [x] Attacco 2: caller ID spoofing con INVITE falsificato
-- [ ] Contromisure (SRTP, SIP/TLS, autenticazione) e confronto prima/dopo
+- [x] Contromisure (SRTP, SIP/TLS, autenticazione) e confronto prima/dopo
 
 ## 8. Nota sulla sicurezza
 
