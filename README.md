@@ -1,6 +1,8 @@
 # VoIP-lab
 
-Un piccolo laboratorio per **rompere** e poi **difendere** le comunicazioni VoIP. In pratica ricostruisco un'intera reticella telefonica dentro Docker — un centralino, un telefono-vittima e due container per gli attacchi (uno che intercetta, uno che falsifica l'identità) — per far vedere dal vivo cosa succede quando SIP e RTP viaggiano senza protezioni.
+Un piccolo laboratorio per **rompere** e poi **difendere** le comunicazioni VoIP. In pratica ricostruisco un'intera reticella telefonica dentro Docker — centralino, telefono-vittima e due container "cattivi" — per far vedere dal vivo cosa succede quando SIP e RTP viaggiano senza protezioni.
+
+> Spiegazione dettagliata di ogni pezzo in **[STRUTTURA_LAB.md](STRUTTURA_LAB.md)**.
 
 ## 1. Obiettivo
 
@@ -9,7 +11,7 @@ L'idea di fondo: i protocolli base del VoIP (**SIP** e **RTP**) sono nati per *f
 1. **Ascoltare la conversazione** (intercettazione / *eavesdropping*) — colpisce il flusso audio **RTP**.
 2. **Falsificare l'identità del chiamante** (*caller ID spoofing*) — colpisce la segnalazione **SIP**.
 
-Morale: Serve difesa vera (SRTP, SIP/TLS, autenticazione).
+Morale: **non basta fidarsi dei protocolli iniziali**, serve difesa vera (SRTP, SIP/TLS, autenticazione).
 
 ## 2. Mappa dei file del progetto
 
@@ -42,7 +44,7 @@ voip-lab/
 
 ## 3. Requisiti
 
-- **Docker** e **Docker Compose v2** su un host **Linux**.
+- **Docker** e **Docker Compose v2** su un host **Linux** (serve per l'ARP spoofing di basso livello).
 - **Wireshark** sull'host, per ricostruire l'audio e leggere i messaggi SIP dai `.pcap`.
 
 ## 4. Avvio rapido
@@ -77,11 +79,13 @@ Tutti i telefoni sono forzati sul codec **G.711**, così Wireshark riesce a rico
 ## 6. Gli attacchi in breve
 
 **Attacco 1 — Intercettazione (eavesdropping)**
-L'attaccante fa ARP spoofing per mettersi in mezzo (MITM), cattura l'RTP con tcpdump e ricostruisce l'audio in Wireshark. Poiché l'RTP è in chiaro, la conversazione si riascolta.
+L'attaccante fa ARP spoofing per mettersi in mezzo (MITM), cattura l'RTP con tcpdump e ricostruisce l'audio in Wireshark (`Telephony → RTP → Play Streams`). Poiché l'RTP è in chiaro, la conversazione si riascolta.
 
 **Attacco 2 — Caller ID Spoofing (Scenario A)**
-Un container esterno **senza credenziali** invia un INVITE con `From: "Assistenza Banca"`. Il centralino, configurato per accettare chiamate anonime, lo instrada. Il `From:` falso è leggibile in chiaro. È il meccanismo del *vishing*.
-
+Un container esterno **senza credenziali** invia un INVITE con `From: "Assistenza Banca"`. Il centralino, configurato per accettare chiamate anonime, lo instrada. Il `From:` falso è leggibile in chiaro (`Telephony → VoIP Calls` in Wireshark). È il meccanismo del *vishing*.
+```bash
+docker exec -it voip-spoofer sipp -sf /root/spoof.xml 172.20.0.10:5060 -m 1 -nostdin
+```
 
 ## 7. Stato del progetto
 

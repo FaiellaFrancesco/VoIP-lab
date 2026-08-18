@@ -1,0 +1,1 @@
+<sip:6001@172.20.0.10;transport=udp>;auth_user=6001;auth_pass=Passw0rd6001;regint=300;audio_codecs=pcmu,pcma;mediaenc=srtp
