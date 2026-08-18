@@ -1,16 +1,42 @@
 services:
-  asterisk:
+  asterisk-insecure:
     build: ./asterisk
     container_name: voip-asterisk
+    profiles: [insecure]
+    volumes:
+      - ./asterisk/pjsip.insecure.conf:/etc/asterisk/pjsip.conf:ro
     networks:
       voip_net:
         ipv4_address: 172.20.0.10
 
-  phone:
+  asterisk-secure:
+    build: ./asterisk
+    container_name: voip-asterisk
+    profiles: [secure]
+    volumes:
+      - ./asterisk/pjsip.secure.conf:/etc/asterisk/pjsip.conf:ro
+    networks:
+      voip_net:
+        ipv4_address: 172.20.0.10
+
+  phone-insecure:
     build: ./phone
     container_name: voip-phone
-    depends_on:
-      - asterisk
+    profiles: [insecure]
+    volumes:
+      - ./phone/accounts.insecure:/root/.baresip/accounts:ro
+    networks:
+      voip_net:
+        ipv4_address: 172.20.0.20
+    stdin_open: true
+    tty: true
+
+  phone-secure:
+    build: ./phone
+    container_name: voip-phone
+    profiles: [secure]
+    volumes:
+      - ./phone/accounts.secure:/root/.baresip/accounts:ro
     networks:
       voip_net:
         ipv4_address: 172.20.0.20
@@ -20,9 +46,6 @@ services:
   attacker:
     build: ./attacker
     container_name: voip-attacker
-    depends_on:
-      - asterisk
-      - phone
     networks:
       voip_net:
         ipv4_address: 172.20.0.66
@@ -37,8 +60,6 @@ services:
   spoofer:
     build: ./spoofer
     container_name: voip-spoofer
-    depends_on:
-      - asterisk
     networks:
       voip_net:
         ipv4_address: 172.20.0.99

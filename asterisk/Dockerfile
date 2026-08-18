@@ -1,21 +1,19 @@
-# Immagine base (Ubuntu mantiene il pacchetto asterisk; Debian bookworm no)
 FROM ubuntu:24.04
-
-# Evita i prompt interattivi durante l'installazione (es. tzdata)
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Installa Asterisk dai repository Ubuntu
 RUN apt-get update \
- && apt-get install -y --no-install-recommends asterisk \
+ && apt-get install -y --no-install-recommends asterisk openssl \
  && rm -rf /var/lib/apt/lists/*
 
-# Copia le configurazioni del lab
-COPY pjsip.conf       /etc/asterisk/pjsip.conf
-COPY extensions.conf  /etc/asterisk/extensions.conf
+# Certificato self-signed per TLS (usato solo dal profilo "secure")
+RUN mkdir -p /etc/asterisk/keys \
+ && openssl req -x509 -newkey rsa:2048 -nodes \
+      -keyout /etc/asterisk/keys/asterisk.key \
+      -out /etc/asterisk/keys/asterisk.crt \
+      -days 3650 -subj "/CN=172.20.0.10"
 
-# Copia l'audio noto usato dalla extension 500 (Playback)
+COPY extensions.conf  /etc/asterisk/extensions.conf
 RUN mkdir -p /var/lib/asterisk/sounds/en
 COPY secret.wav /var/lib/asterisk/sounds/en/secret.wav
 
-# Avvia Asterisk in primo piano (obbligatorio dentro un container)
 CMD ["asterisk", "-f", "-vvv"]
